@@ -98,16 +98,17 @@ export default class BudgetTracker {
     save() {
         const data = this.getEntryRows().map(row => {
             return {
-                 date: row.querySelector(".input-date").value,
-                 description: row.querySelector(".input-description").value,
-                 type: row.querySelector(".input-type").value,
-                 amount: parseFloat(row.querySelector(".input-type").value),
+                date: row.querySelector(".input-date").value,
+                description: row.querySelector(".input-description").value,
+                type: row.querySelector(".input-type").value,
+                amount: parseFloat(row.querySelector(".input-amount").value), // Fix this line
             }; 
         });
-
-       localStorage.setItem("budget-tracker-entries", JSON.stringify(data));
-       this.updateSummary();
+    
+        localStorage.setItem("budget-tracker-entries", JSON.stringify(data));
+        this.updateSummary();
     }
+    
 
     addEntry(entry = {}) {
          this.root.querySelector(".entries").insertAdjacentHTML("beforeend", BudgetTracker.entryHtml());
@@ -136,7 +137,7 @@ export default class BudgetTracker {
     }
 
     onDeleteEntryBtnClick(e) {
-           e.target.closet("tr").remove();
-           this.save();
+        e.target.closest("tr").remove();
+        this.save();
     }
 }
