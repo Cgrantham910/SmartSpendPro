@@ -9,6 +9,38 @@
     <script type="module" src="JS/main.js"></script>
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <!-- Your Budget Tracker table -->
+        <table class="budget-tracker">
+            <thead>
+                <tr>
+                    <th>DATE</th>
+                    <th>DESCRIPTION</th>
+                    <th>TYPE</th>
+                    <th>CATEGORY</th> <!-- Add this column -->
+                    <th>AMOUNT</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="entries">
+                <!-- Entry rows will be added here -->
+            </tbody>
+            <tbody>
+                <tr>
+                    <td colspan="6" class="controls">
+                        <button type="button" class="new-entry">New Entry</button>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="summary">
+                        <strong>Total:</strong>
+                        <span class="total">$0.00</span>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </body>
 </html>

@@ -7,6 +7,23 @@ export default class BudgetTracker {
             this.onNewEntryBtnClick();
         });
 
+        this.root.querySelector(".sort-date").addEventListener("click", () => {
+            this.sortEntriesBy("date");
+        });
+
+        this.root.querySelector(".sort-amount").addEventListener("click", () => {
+            this.sortEntriesBy("amount");
+        });
+
+        this.root.querySelector(".filter-type").addEventListener("change", () => {
+            this.filterEntriesByType();
+        });
+
+        this.root.querySelector(".clear-all").addEventListener("click", () => {
+            this.clearAllEntries();
+        });
+
+
         // Load initial data from Local Storage
         this.load();
     }
@@ -57,6 +74,13 @@ export default class BudgetTracker {
                 <option value="income">Income</option>
                 <option value="expense">Expense</option>
             </select>
+            <select class="input input-category">
+                <option value="food">Food</option>
+                <option value="transportation">Transportation</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="utilities">Utilities</option>
+                <option value="other">Other</option>
+            </select>
         </td>
         <td>
             <input type="number" class="input input-amount">
@@ -101,7 +125,8 @@ export default class BudgetTracker {
                 date: row.querySelector(".input-date").value,
                 description: row.querySelector(".input-description").value,
                 type: row.querySelector(".input-type").value,
-                amount: parseFloat(row.querySelector(".input-amount").value), // Fix this line
+                category: row.querySelector(".input-category").value,
+                amount: parseFloat(row.querySelector(".input-amount").value),
             }; 
         });
     
@@ -126,7 +151,118 @@ export default class BudgetTracker {
          row.querySelectorAll(".input").forEach(input => {
             input.addEventListener("change", () => this.save());
          })
+
+         const categorySelect = this.addCategorySelect();
+         categorySelect.value = entry.category || "other";
+         row.querySelector(".input-category").appendChild(categorySelect);
     }
+
+
+    editEntry(row) {
+        const inputDescription = row.querySelector(".input-description");
+        const inputAmount = row.querySelector(".input-amount");
+
+        // Enable editing
+        inputDescription.disabled = false;
+        inputAmount.disabled = false;
+
+        // Store original values
+        const originalDescription = inputDescription.value;
+        const originalAmount = inputAmount.value;
+
+        // Focus on description input
+        inputDescription.focus();
+
+        // Disable editing on blur
+        inputDescription.addEventListener("blur", () => {
+            if (this.validateInput(row)) { // Validate the edited input
+                this.save();
+            } else {
+                inputDescription.value = originalDescription;
+                inputAmount.value = originalAmount;
+            }
+            inputDescription.disabled = true;
+            inputAmount.disabled = true;
+        });
+
+        // Listen for Enter key press
+        inputDescription.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                inputDescription.blur(); // Save on Enter
+            }
+        });
+
+        // Disable editing on Enter key press
+        inputAmount.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                inputDescription.blur();
+            }
+        });
+
+        inputAmount.addEventListener("blur", () => {
+            if (this.validateInput(row)) { // Validate the edited input
+                this.save();
+            } else {
+                inputDescription.value = originalDescription;
+                inputAmount.value = originalAmount;
+            }
+            inputDescription.disabled = true;
+            inputAmount.disabled = true;
+        });
+    }
+
+
+    validateInput(row) {
+        const inputDescription = row.querySelector(".input-description");
+        const inputAmount = row.querySelector(".input-amount");
+        const errorDescription = row.querySelector(".error-description");
+        const errorAmount = row.querySelector(".error-amount");
+        let isValid = true;
+
+        // Clear previous error messages
+        errorDescription.textContent = "";
+        errorAmount.textContent = "";
+
+        const description = inputDescription.value.trim();
+        const amount = parseFloat(inputAmount.value);
+
+        if (description === "") {
+            errorDescription.textContent = "Description is required";
+            isValid = false;
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+            errorAmount.textContent = "Amount must be a positive number";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+
+    addCategorySelect() {
+        const select = document.createElement("select");
+        select.classList.add("input", "input-category");
+    
+        const categories = [
+            { value: "food", label: "Food" },
+            { value: "transportation", label: "Transportation" },
+            { value: "entertainment", label: "Entertainment" },
+            { value: "utilities", label: "Utilities" },
+            { value: "other", label: "Other" }
+        ];
+    
+        for (const category of categories) {
+            const option = document.createElement("option");
+            option.value = category.value;
+            option.textContent = category.label;
+            select.appendChild(option);
+        }
+    
+        return select;
+    }
+    
+
 
     getEntryRows() {
         return Array.from(this.root.querySelectorAll(".entries tr"));
@@ -137,7 +273,9 @@ export default class BudgetTracker {
     }
 
     onDeleteEntryBtnClick(e) {
-        e.target.closest("tr").remove();
+         e.target.closest("tr").remove();
         this.save();
     }
+    
 }
+

@@ -1,60 +1,96 @@
+/* General Styles */
 .budget-tracker {
     border-collapse: collapse;
     min-width: 750px;
+    font-family: 'Verdana', 'Geneva', 'Tahoma', sans-serif;
 }
 
-.budget-tracker * {
-    font-family: Verdana, Geneva, Tahoma, sans-serif
-}
-
+/* Table Header Styles */
 .budget-tracker th {
     text-align: left;
     padding: 10px 20px;
     border-bottom: 2px solid #009500;
-
+    background-color: #f4f4f4; /* Light gray background */
+    color: #333; /* Darker text color */
 }
 
+/* Table Data Cell Styles */
 .budget-tracker td {
-    padding: 5px;
+    padding: 12px;
 }
 
+/* Input and Delete Button Styles */
 .input,
 .delete-entry {
-    height: 30px;
-    font-size: 13px;
-    padding: 0 10px;
+    height: 40px;
+    font-size: 14px;
+    padding: 0 14px;
     margin: 0;
     box-sizing: border-box;
 }
 
 .input {
-    border: 1px solid #dddddd;
-    border-radius: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     outline: none;
+    transition: border-color 0.2s ease-in-out;
+    width: 100%; /* Full-width input */
 }
 
 .input:focus {
-    border-color: #bbbbbb;
-
+    border-color: #007bff; /* Blue border color on focus */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1); /* Light blue shadow on focus */
 }
 
 .delete-entry {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
+    width: 36px;
     background: none;
-    color: red;
+    color: #ff4d4d;
     border-radius: 50%;
     outline: none;
     cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
 }
 
 .delete-entry:hover {
-    background: rgba(255, 0, 0, 0.1);
+    background-color: rgba(255, 77, 77, 0.1);
 }
 
+/* Controls and Summary Styles */
 .controls,
 .summary {
     text-align: right;
+    padding: 12px;
 }
+
+/* Category Select Styles */
+.input-category {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    width: 160px;
+}
+
+.input-category:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Error Message Styles */
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Hover Effect for Table Rows */
+.budget-tracker tbody tr:hover {
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
