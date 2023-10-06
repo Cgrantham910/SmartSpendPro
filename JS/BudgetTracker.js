@@ -1,281 +1,99 @@
-export default class BudgetTracker {
-    constructor(querySelectorString) {
-        this.root = document.querySelector(querySelectorString);
-        this.root.innerHTML = BudgetTracker.html();
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("budget-form");
+    const incomeInput = document.getElementById("income");
+    const expensesInput = document.getElementById("expenses");
+    const incomeResult = document.getElementById("income-result");
+    const expensesResult = document.getElementById("expenses-result");
+    const balanceResult = document.getElementById("balance-result");
 
-        this.root.querySelector(".new-entry").addEventListener("click", () => {
-            this.onNewEntryBtnClick();
-        });
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
 
-        this.root.querySelector(".sort-date").addEventListener("click", () => {
-            this.sortEntriesBy("date");
-        });
+        const income = parseFloat(incomeInput.value) || 0;
+        const expenses = parseFloat(expensesInput.value) || 0;
 
-        this.root.querySelector(".sort-amount").addEventListener("click", () => {
-            this.sortEntriesBy("amount");
-        });
+        const incomeFormatted = formatCurrency(income);
+        const expensesFormatted = formatCurrency(expenses);
+        const balance = income - expenses;
+        const balanceFormatted = formatCurrency(balance);
 
-        this.root.querySelector(".filter-type").addEventListener("change", () => {
-            this.filterEntriesByType();
-        });
+        incomeResult.textContent = incomeFormatted;
+        expensesResult.textContent = expensesFormatted;
+        balanceResult.textContent = balanceFormatted;
+    });
 
-        this.root.querySelector(".clear-all").addEventListener("click", () => {
-            this.clearAllEntries();
-        });
-
-
-        // Load initial data from Local Storage
-        this.load();
+    function formatCurrency(amount) {
+        return "$" + amount.toFixed(2);
     }
+});
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("budget-form");
+    const incomeInput = document.getElementById("income");
+    const expensesInput = document.getElementById("expenses");
+    const categoryInput = document.getElementById("category");
+    const dateInput = document.getElementById("expense-date");
+    const incomeResult = document.getElementById("income-result");
+    const expensesResult = document.getElementById("expenses-result");
+    const balanceResult = document.getElementById("balance-result");
+    const expenseList = document.getElementById("expense-list");
 
-    static html() {
-        return `
-        <table class="budget-tracker">
-        <thead>
-            <tr>
-                <th>DATE</th>
-                <th>DESCRIPTION</th>
-                <th>TYPE</th>
-                <th>AMOUNT</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody class="entries"> </tbody>
-        <tbody>
-            <tr>
-                <td colspan="5" class="controls">
-                    <button type="button" class="new-entry">New Entry</button>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="5" class="summary">
-                    <strong>Total:</strong>
-                    <span class="total">$0.00</span>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-        `;
-    }
+    const expenses = []; // Array to store expense details
 
-    static entryHtml() {
-        return `
-        <tr>
-        <td>
-            <input class="input input-date" type="date">
-        </td>
-        <td>
-            <input class="input input-description" type="text" placeholder="Add description (e.g. wages, bills, etc.)">
-        </td>
-        <td>
-            <select class="input input-type">
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-            </select>
-            <select class="input input-category">
-                <option value="food">Food</option>
-                <option value="transportation">Transportation</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="utilities">Utilities</option>
-                <option value="other">Other</option>
-            </select>
-        </td>
-        <td>
-            <input type="number" class="input input-amount">
-        </td>
-        <td>
-            <button type="button" class="delete-entry">&#10005;</button>
-        </td>
-    </tr>
-        `;
-    }
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
 
-    load() {
-        const entries = JSON.parse(localStorage.getItem("budget-tracker-entries") || "[]");
+        const income = parseFloat(incomeInput.value) || 0;
+        const expenseAmount = parseFloat(expensesInput.value) || 0;
+        const category = categoryInput.value;
+        const expenseDate = dateInput.value;
 
-        for (const entry of entries) {
-            this.addEntry(entry);
+        if (!category || !expenseDate) {
+            alert("Please fill in both category and date for the expense.");
+            return;
         }
 
-        this.updateSummary();
+        const expense = {
+            amount: expenseAmount,
+            category: category,
+            date: expenseDate
+        };
+
+        expenses.push(expense); // Add the expense to the list
+
+        const incomeFormatted = formatCurrency(income);
+        const totalExpenses = calculateTotalExpenses(expenses);
+        const expensesFormatted = formatCurrency(totalExpenses);
+        const balance = income - totalExpenses;
+        const balanceFormatted = formatCurrency(balance);
+
+        incomeResult.textContent = incomeFormatted;
+        expensesResult.textContent = expensesFormatted;
+        balanceResult.textContent = balanceFormatted;
+
+        // Update the expense list
+        updateExpenseList(expenseList, expenses);
+
+        // Clear input fields
+        expensesInput.value = "";
+        categoryInput.value = "";
+        dateInput.value = "";
+    });
+
+    function formatCurrency(amount) {
+        return "$" + amount.toFixed(2);
     }
 
-    updateSummary() {
-        const total = this.getEntryRows().reduce((total, row) => {
-            const amount = row.querySelector(".input-amount").value;
-            const isExpense = row.querySelector(".input-type").value == "expense";
-            const modifier = isExpense ? -1 : 1;
-
-            return total + (amount * modifier);
-        }, 0);
-
-        const totalFormatted = new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD"
-        }).format(total);
-
-        this.root.querySelector(".total").textContent = totalFormatted
+    function calculateTotalExpenses(expenses) {
+        return expenses.reduce((total, expense) => total + expense.amount, 0);
     }
 
-    save() {
-        const data = this.getEntryRows().map(row => {
-            return {
-                date: row.querySelector(".input-date").value,
-                description: row.querySelector(".input-description").value,
-                type: row.querySelector(".input-type").value,
-                category: row.querySelector(".input-category").value,
-                amount: parseFloat(row.querySelector(".input-amount").value),
-            }; 
-        });
-    
-        localStorage.setItem("budget-tracker-entries", JSON.stringify(data));
-        this.updateSummary();
-    }
-    
+    function updateExpenseList(listElement, expenses) {
+        listElement.innerHTML = ""; // Clear existing list
 
-    addEntry(entry = {}) {
-         this.root.querySelector(".entries").insertAdjacentHTML("beforeend", BudgetTracker.entryHtml());
-
-         const row = this.root.querySelector(".entries tr:last-of-type");
-
-         row.querySelector(".input-date").value = entry.date || new Date(). toISOString().replace(/T.*/, "");
-         row.querySelector(".input-description").value = entry.description || "";
-         row.querySelector(".input-type").value = entry.type || "income";
-         row.querySelector(".input-amount").value = entry.amount || 0;
-         row.querySelector(".delete-entry").addEventListener("click", e => {
-             this.onDeleteEntryBtnClick(e);
-         });
-
-         row.querySelectorAll(".input").forEach(input => {
-            input.addEventListener("change", () => this.save());
-         })
-
-         const categorySelect = this.addCategorySelect();
-         categorySelect.value = entry.category || "other";
-         row.querySelector(".input-category").appendChild(categorySelect);
-    }
-
-
-    editEntry(row) {
-        const inputDescription = row.querySelector(".input-description");
-        const inputAmount = row.querySelector(".input-amount");
-
-        // Enable editing
-        inputDescription.disabled = false;
-        inputAmount.disabled = false;
-
-        // Store original values
-        const originalDescription = inputDescription.value;
-        const originalAmount = inputAmount.value;
-
-        // Focus on description input
-        inputDescription.focus();
-
-        // Disable editing on blur
-        inputDescription.addEventListener("blur", () => {
-            if (this.validateInput(row)) { // Validate the edited input
-                this.save();
-            } else {
-                inputDescription.value = originalDescription;
-                inputAmount.value = originalAmount;
-            }
-            inputDescription.disabled = true;
-            inputAmount.disabled = true;
-        });
-
-        // Listen for Enter key press
-        inputDescription.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                inputDescription.blur(); // Save on Enter
-            }
-        });
-
-        // Disable editing on Enter key press
-        inputAmount.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                inputDescription.blur();
-            }
-        });
-
-        inputAmount.addEventListener("blur", () => {
-            if (this.validateInput(row)) { // Validate the edited input
-                this.save();
-            } else {
-                inputDescription.value = originalDescription;
-                inputAmount.value = originalAmount;
-            }
-            inputDescription.disabled = true;
-            inputAmount.disabled = true;
+        expenses.forEach((expense, index) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `Expense ${index + 1}: ${formatCurrency(expense.amount)} (${expense.category}, ${expense.date})`;
+            listElement.appendChild(listItem);
         });
     }
-
-
-    validateInput(row) {
-        const inputDescription = row.querySelector(".input-description");
-        const inputAmount = row.querySelector(".input-amount");
-        const errorDescription = row.querySelector(".error-description");
-        const errorAmount = row.querySelector(".error-amount");
-        let isValid = true;
-
-        // Clear previous error messages
-        errorDescription.textContent = "";
-        errorAmount.textContent = "";
-
-        const description = inputDescription.value.trim();
-        const amount = parseFloat(inputAmount.value);
-
-        if (description === "") {
-            errorDescription.textContent = "Description is required";
-            isValid = false;
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-            errorAmount.textContent = "Amount must be a positive number";
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-
-    addCategorySelect() {
-        const select = document.createElement("select");
-        select.classList.add("input", "input-category");
-    
-        const categories = [
-            { value: "food", label: "Food" },
-            { value: "transportation", label: "Transportation" },
-            { value: "entertainment", label: "Entertainment" },
-            { value: "utilities", label: "Utilities" },
-            { value: "other", label: "Other" }
-        ];
-    
-        for (const category of categories) {
-            const option = document.createElement("option");
-            option.value = category.value;
-            option.textContent = category.label;
-            select.appendChild(option);
-        }
-    
-        return select;
-    }
-    
-
-
-    getEntryRows() {
-        return Array.from(this.root.querySelectorAll(".entries tr"));
-    }
-
-    onNewEntryBtnClick() {
-         this.addEntry();
-    }
-
-    onDeleteEntryBtnClick(e) {
-         e.target.closest("tr").remove();
-        this.save();
-    }
-    
-}
-
+});

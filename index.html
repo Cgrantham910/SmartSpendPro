@@ -2,45 +2,221 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Tracker</title>
-    <link rel="stylesheet" href="CSS/main.css">
-    <script type="module" src="JS/main.js"></script>
+    <title>Budget Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            background-color: #007BFF;
+            color: #fff;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button[type="submit"],
+        button[type="button"] {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover,
+        button[type="button"]:hover {
+            background-color: #0056b3;
+        }
+
+        #results,
+        #expense-list {
+            border-top: 1px solid #ccc;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Your Budget Tracker table -->
-        <table class="budget-tracker">
-            <thead>
-                <tr>
-                    <th>DATE</th>
-                    <th>DESCRIPTION</th>
-                    <th>TYPE</th>
-                    <th>CATEGORY</th> <!-- Add this column -->
-                    <th>AMOUNT</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody class="entries">
-                <!-- Entry rows will be added here -->
-            </tbody>
-            <tbody>
-                <tr>
-                    <td colspan="6" class="controls">
-                        <button type="button" class="new-entry">New Entry</button>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="6" class="summary">
-                        <strong>Total:</strong>
-                        <span class="total">$0.00</span>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+    <h1>Budget Planner</h1>
+
+    <div class="container">
+        <form id="budget-form">
+            <h2>Income and Expenses</h2>
+            <div>
+                <label for="income">Income:</label>
+                <input type="number" id="income" placeholder="Enter income" required>
+            </div>
+            <div>
+                <label for="expenses">Expenses:</label>
+                <input type="number" id="expenses" placeholder="Enter expenses" required>
+            </div>
+            <button type="submit">Calculate</button>
+        </form>
+
+        <div id="results">
+            <h2>Results</h2>
+            <p>Total Income: <span id="income-result">$0.00</span></p>
+            <p>Total Expenses: <span id="expenses-result">$0.00</span></p>
+            <p>Balance: <span id="balance-result">$0.00</span></p>
+        </div>
+
+        <form id="expense-form">
+            <h2>Add Expense</h2>
+            <div>
+                <label for="category">Category:</label>
+                <input type="text" id="category" placeholder="Enter category" required>
+            </div>
+            <div>
+                <label for="expense-amount">Amount:</label>
+                <input type="number" id="expense-amount" placeholder="Enter amount" required>
+            </div>
+            <div>
+                <label for="expense-date">Date:</label>
+                <input type="date" id="expense-date" required>
+            </div>
+            <button type="button" id="add-expense">Add Expense</button>
+        </form>
+
+        <div id="expense-list">
+            <h2>Expense List</h2>
+            <ul id="expense-list-ul"></ul>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("budget-form");
+            const incomeInput = document.getElementById("income");
+            const expensesInput = document.getElementById("expenses");
+            const incomeResult = document.getElementById("income-result");
+            const expensesResult = document.getElementById("expenses-result");
+            const balanceResult = document.getElementById("balance-result");
+
+            function calculateTotalExpenses() {
+                const totalExpenses = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+                return totalExpenses;
+            }
+
+
+            function calculateTotalExpenses() {
+                const totalExpenses = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+                return totalExpenses;
+            }
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const income = parseFloat(incomeInput.value) || 0;
+                const expenses = parseFloat(expensesInput.value) || 0;
+
+                const incomeFormatted = formatCurrency(income);
+                const expensesFormatted = formatCurrency(expenses);
+                const balance = income - expenses;
+                const balanceFormatted = formatCurrency(balance);
+
+                incomeResult.textContent = incomeFormatted;
+                expensesResult.textContent = expensesFormatted;
+                balanceResult.textContent = balanceFormatted;
+            });
+
+            function formatCurrency(amount) {
+                return "$" + amount.toFixed(2);
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const expenseForm = document.getElementById("expense-form");
+            const categoryInput = document.getElementById("category");
+            const expenseAmountInput = document.getElementById("expense-amount");
+            const expenseDateInput = document.getElementById("expense-date");
+            const expenseList = document.querySelector("#expense-list ul");
+            const addExpenseButton = document.getElementById("add-expense");
+
+            const expenses = [];
+
+            addExpenseButton.addEventListener("click", function () {
+                const category = categoryInput.value;
+                const amount = parseFloat(expenseAmountInput.value) || 0;
+                const date = expenseDateInput.value;
+
+                if (!category || isNaN(amount) || amount <= 0 || !date) {
+                    alert("Please fill in all fields with valid data.");
+                    return;
+                }
+
+                const expense = {
+                    category: category,
+                    amount: amount,
+                    date: date,
+                };
+
+                expenses.push(expense);
+                updateExpenseList();
+                clearExpenseForm();
+            });
+
+            function updateExpenseList() {
+                expenseList.innerHTML = "";
+
+                expenses.forEach((expense, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `Expense ${index + 1}: ${expense.category} - $${expense.amount.toFixed(2)} (${expense.date})`;
+                    expenseList.appendChild(listItem);
+                });
+            }
+
+            function clearExpenseForm() {
+                categoryInput.value = "";
+                expenseAmountInput.value = "";
+                expenseDateInput.value = "";
+            }
+        });
+
+
+        
+    </script>
 </body>
 </html>
